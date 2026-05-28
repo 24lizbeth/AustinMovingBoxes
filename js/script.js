@@ -19,32 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Quote button alert
-    const quoteBtn = document.getElementById('quoteBtn');
-    if (quoteBtn) {
-        quoteBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert("Our team will reach out with moving boxes pricing within 24 hours. Thank you for choosing BoxCycle!");
-        });
-    }
-
-    // Commercial contact button
-    const commercialContact = document.getElementById('commercialContactBtn');
-    if (commercialContact) {
-        commercialContact.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert("A commercial moving specialist will contact you within one business day.");
-        });
-    }
-
-    // Reserve kit buttons (residential page)
-    const reserveBtns = document.querySelectorAll('.reserve-btn');
-    reserveBtns.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert("Thank you for your interest! Our team will help you reserve the moving box kit.");
-        });
-    });
+   
 
     // Initialize map only if the element exists (home page)
     const mapElement = document.getElementById('location-map');
