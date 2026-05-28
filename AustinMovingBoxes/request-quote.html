@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request a Quote – Moving Boxes Rental | BoxCycle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Additional form styles (same as previous) */
+        .form-section { padding: 4rem 0; background: #f9fbfc; }
+        .quote-form-container { max-width: 800px; margin: 0 auto; background: white; border-radius: 32px; padding: 2.5rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.08); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        label { font-weight: 600; margin-bottom: 0.5rem; display: block; }
+        input, datalist, select { width: 100%; padding: 0.9rem; border: 1px solid #d0dae0; border-radius: 16px; font-family: inherit; }
+        .checkbox-group { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; }
+        .error-message { color: #c72a2a; font-size: 0.75rem; display: none; }
+        @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <header class="site-header"><!-- same header as before, with active link to request-quote.html --></header>
+    <main>
+        <section class="page-hero alt-bg"><div class="container"><h1>Request a quote for <strong>moving boxes</strong></h1></div></section>
+        <section class="form-section">
+            <div class="container">
+                <div class="quote-form-container">
+                    <form name="rental-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" id="rentalForm">
+                        <input type="hidden" name="form-name" value="rental-quote">
+                        <div class="form-row">
+                            <div class="form-group"><label>First name *</label><input type="text" name="first_name" required></div>
+                            <div class="form-group"><label>Last name *</label><input type="text" name="last_name" required></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Rental start date *</label><input type="text" id="startDate" name="rental_start" required></div>
+                            <div class="form-group"><label>Rental end date *</label><input type="text" id="endDate" name="rental_end" required></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Delivery address *</label>
+                            <input list="serviceLocations" name="delivery_address" id="delivery_address" required>
+                            <datalist id="serviceLocations">
+                                <option>San Francisco, CA</option><option>Los Angeles, CA</option><option>Seattle, WA</option>
+                                <option>Portland, OR</option><option>Chicago, IL</option><option>New York, NY</option>
+                                <option>Austin, TX</option><option>Denver, CO</option>
+                            </datalist>
+                            <div class="checkbox-group"><input type="checkbox" name="delivery_has_stairs" value="yes"><label>This location has stairs</label></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Pickup address *</label>
+                            <input list="serviceLocations" name="pickup_address" required>
+                            <div class="checkbox-group"><input type="checkbox" name="pickup_has_stairs" value="yes"><label>This location has stairs</label></div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Email *</label><input type="email" name="email" required></div>
+                            <div class="form-group"><label>Phone *</label><input type="tel" name="phone" required></div>
+                        </div>
+                        <div class="form-submit"><button type="submit" class="btn btn-primary">Send rental request</button></div>
+                    </form>
+                    <div id="formStatus"></div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="site-footer"><!-- same footer --></footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        // Fetch blocked date ranges from Airtable via Netlify Function
+        async function getBlockedDates() {
+            try {
+                const res = await fetch('/.netlify/functions/blocked-dates');
+                const data = await res.json();
+                return data.blockedRanges || []; // each: { start, end }
+            } catch(e) { return []; }
+        }
+
+        // Convert blocked ranges into an array of disabled dates for flatpickr
+        function buildDisabledDates(blockedRanges) {
+            let disabled = [];
+            blockedRanges.forEach(range => {
+                let start = new Date(range.start);
+                let end = new Date(range.end);
+                for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
+                    disabled.push(new Date(d));
+                }
+            });
+            return disabled;
+        }
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const blockedRanges = await getBlockedDates();
+            const disabledDates = buildDisabledDates(blockedRanges);
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            const startPicker = flatpickr("#startDate", {
+                dateFormat: "Y-m-d",
+                minDate: today,
+                disable: disabledDates,
+                onChange: function(selectedDates, dateStr) {
+                    if(selectedDates.length) endPicker.set('minDate', selectedDates[0]);
+                }
+            });
+            const endPicker = flatpickr("#endDate", {
+                dateFormat: "Y-m-d",
+                minDate: today,
+                disable: disabledDates
+            });
+        });
+    </script>
+</body>
+</html>
